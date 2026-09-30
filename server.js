@@ -8,6 +8,7 @@ const cuePagarRoutes = require('./app/routes/cuepagar.routes');
 const cueCobrarRoutes = require('./app/routes/cuecobrar.routes');
 const balGeneralRoutes = require('./app/routes/balgeneral.routes');
 const balResulRoutes = require('./app/routes/balresul.routes');
+const libroDiarioRoutes = require('./app/routes/librodiario.routes');
 const trabajadoresRoutes = require('./app/routes/trabajadores.routes');
 const clientesRoutes = require('./app/routes/clientes.routes');
 const proveedoresRoutes = require('./app/routes/proveedores.routes');
@@ -78,6 +79,7 @@ const menuLinkMap = {
   '/html/FrmCueCobrar.html': '/cuentas-por-cobrar',
   '/html/FrmBalGeneral.html': '/balance-general',
   '/html/FrmBalResul.html': '/balance-resultados',
+  '/html/LibroDiario.html': '/libro-diario',
   '/html/ResumenAdm.html': '/resumen-administrativo',
   '/html/ResumenAvi.html': '/resumen-avicola',
   '/html/ResumenPor.html': '/resumen-porcina',
@@ -155,6 +157,7 @@ function obtenerModulosPorRuta() {
   resultado['/cuentas-por-cobrar'] = 'ADMINISTRATIVO';
   resultado['/balance-general'] = 'ADMINISTRATIVO';
   resultado['/balance-resultados'] = 'ADMINISTRATIVO';
+  resultado['/libro-diario'] = 'ADMINISTRATIVO';
   resultado['/resumen-administrativo'] = 'ADMINISTRATIVO';
   resultado['/resumen-avicola'] = 'AVICOLA';
   resultado['/pesajeavicola'] = 'AVICOLA';
@@ -177,6 +180,7 @@ const rutasLimpias = {
   '/cuentas-por-cobrar': '/html/FrmCueCobrar.html',
   '/balance-general': '/html/FrmBalGeneral.html',
   '/balance-resultados': '/html/FrmBalResul.html',
+  '/libro-diario': '/html/LibroDiario.html',
   '/resumen-administrativo': '/html/ResumenAdm.html',
   '/resumen-avicola': '/html/ResumenAvi.html',
   '/pesajeavicola': '/html/FrmPesajeavi.html',
