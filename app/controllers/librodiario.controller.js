@@ -46,176 +46,128 @@ function generarPDF(rows, res) {
   res.setHeader('Content-Disposition', 'inline; filename="diariogeneral.pdf"');
   doc.pipe(res);
 
-  // Formato basado en el Diario General de referencia:
-  // FECHA | CODIGO | CUENTA / REFERENCIA | DEBE | HABER
-  const pageLeft = 38;
-  const pageRight = doc.page.width - 38;
-  const pageWidth = pageRight - pageLeft;
+  // El PDF reproduce la misma tabla que se muestra en pantalla.
+  // Los valores se toman directamente de detdiariogeneral y no se
+  // transforman, recortan, justifican ni agrupan.
+  const left = 38;
+  const right = doc.page.width - 38;
+  const tableWidth = right - left;
 
-  const xFecha = pageLeft;
-  const xCodigo = xFecha + 62;
-  const xDetalle = xCodigo + 58;
-  const xDebe = pageRight - 112;
-  const xHaber = pageRight - 56;
+  const columns = [
+    { key: 'fecha',     title: 'Fecha',              width: 78,  align: 'left'  },
+    { key: 'codcuenta', title: 'Código',             width: 92,  align: 'left'  },
+    { key: 'detalle',   title: 'Cuenta / Referencia',width: 275, align: 'left'  },
+    { key: 'debe',      title: 'Debe',               width: 75,  align: 'right' },
+    { key: 'haber',     title: 'Haber',              width: 75,  align: 'right' }
+  ];
 
-  const wFecha = xCodigo - xFecha - 5;
-  const wCodigo = xDetalle - xCodigo - 5;
-  const wDetalle = xDebe - xDetalle - 8;
-  const wMonto = 52;
+  const scale = tableWidth / columns.reduce((sum, col) => sum + col.width, 0);
+  columns.forEach(col => col.width *= scale);
 
-  const top = 27;
-  const headerLine = 76;
-  const bottom = doc.page.height - 42;
+  const headerHeight = 23;
+  const rowHeight = 22;
+  const top = 72;
+  const bottom = doc.page.height - 38;
+  const fontSize = 8;
 
-  function encabezado() {
-    doc.font('Helvetica-Bold').fontSize(9.5);
-    doc.text(
-      'JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD',
-      pageLeft,
-      top,
-      { width: pageWidth, align: 'left', lineBreak: false }
-    );
+  function xFor(index) {
+    let x = left;
+    for (let i = 0; i < index; i++) x += columns[i].width;
+    return x;
+  }
+
+  function dibujarEncabezado() {
+    doc.font('Helvetica-Bold').fontSize(9);
+    doc.text('JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD', left, 25, {
+      width: tableWidth,
+      align: 'left',
+      lineBreak: false
+    });
 
     doc.font('Helvetica-Bold').fontSize(11);
-    doc.text(
-      'DIARIO GENERAL',
-      pageLeft,
-      42,
-      { width: pageWidth, align: 'center', lineBreak: false }
-    );
-
-    doc.font('Helvetica').fontSize(7.5);
-    doc.text('FECHA', xFecha, 63, { width: wFecha, lineBreak: false });
-    doc.text('CODIGO', xCodigo, 63, { width: wCodigo, lineBreak: false });
-    doc.text('CUENTA / REFERENCIA', xDetalle, 63, {
-      width: wDetalle,
-      lineBreak: false
-    });
-    doc.text('DEBE', xDebe, 63, {
-      width: wMonto,
-      align: 'right',
-      lineBreak: false
-    });
-    doc.text('HABER', xHaber, 63, {
-      width: wMonto,
-      align: 'right',
+    doc.text('DIARIO GENERAL', left, 41, {
+      width: tableWidth,
+      align: 'center',
       lineBreak: false
     });
 
-    doc.moveTo(pageLeft, headerLine)
-      .lineTo(pageRight, headerLine)
+    let x = left;
+
+    columns.forEach(col => {
+      doc.save();
+      doc.rect(x, top, col.width, headerHeight).clip();
+      doc.font('Helvetica-Bold').fontSize(8);
+      doc.text(col.title, x + 6, top + 7, {
+        width: col.width - 12,
+        align: col.align,
+        lineBreak: false
+      });
+      doc.restore();
+
+      doc.rect(x, top, col.width, headerHeight).lineWidth(0.5).stroke();
+      x += col.width;
+    });
+
+    doc.moveTo(left, top + headerHeight)
+      .lineTo(right, top + headerHeight)
       .lineWidth(0.5)
       .stroke();
   }
 
-  function piePagina() {
-    const paginas = doc.bufferedPageRange();
-    for (let i = 0; i < paginas.count; i++) {
-      doc.switchToPage(i);
-      doc.font('Helvetica').fontSize(7);
-      doc.text(
-        'pag. ' + (i + 1) + ' de ' + paginas.count,
-        pageLeft,
-        doc.page.height - 27,
-        { width: pageWidth, align: 'right', lineBreak: false }
-      );
-    }
-  }
+  function dibujarFila(row, y) {
+    let x = left;
 
-  function altoTexto(texto, ancho, size = 7.5) {
-    return doc.heightOfString(String(texto ?? ''), {
-      width: ancho,
-      font: 'Helvetica',
-      fontSize: size
+    columns.forEach(col => {
+      // String() conserva exactamente el contenido recibido desde PostgreSQL:
+      // no trim, no replace, no conversión de fecha ni de importes.
+      const valor = row[col.key] == null ? '' : String(row[col.key]);
+
+      doc.save();
+      doc.rect(x, y, col.width, rowHeight).clip();
+      doc.font('Helvetica').fontSize(fontSize);
+      doc.text(valor, x + 6, y + 7, {
+        width: col.width - 12,
+        align: col.align,
+        lineBreak: false
+      });
+      doc.restore();
+
+      doc.rect(x, y, col.width, rowHeight).lineWidth(0.35).stroke();
+      x += col.width;
     });
   }
 
-  let y = 82;
-  let ultimoAsiento = null;
+  let y = top + headerHeight;
+  let pagina = 1;
 
-  encabezado();
-
-  function nuevaPagina() {
-    doc.addPage();
-    y = 82;
-    encabezado();
-  }
+  dibujarEncabezado();
 
   for (const row of rows) {
-    // No se alteran los campos de texto para construir el contenido.
-    const asiento = String(row.numasient ?? '');
-    const codigo = String(row.codcuenta ?? '');
-    const detalle = String(row.detalle ?? '');
-    const referencia = codigo === '';
-
-    // En el formato original, la referencia SA va primero con la fecha,
-    // luego aparece el número de asiento y después sus cuentas.
-    if (referencia) {
-      const alto = Math.max(11, altoTexto(detalle, pageWidth - 10));
-
-      if (y + alto > bottom) nuevaPagina();
-
-      doc.font('Helvetica').fontSize(7.5);
-      doc.text(String(fecha(row.fecha) || ''), xFecha, y, {
-        width: wFecha,
-        lineBreak: false
-      });
-      doc.text(detalle, xDetalle - 3, y, {
-        width: pageRight - xDetalle + 3,
+    if (y + rowHeight > bottom) {
+      doc.font('Helvetica').fontSize(7);
+      doc.text('pag. ' + pagina, left, doc.page.height - 25, {
+        width: tableWidth,
+        align: 'right',
         lineBreak: false
       });
 
-      y += Math.max(11, alto + 2);
-      continue;
+      doc.addPage();
+      pagina++;
+      dibujarEncabezado();
+      y = top + headerHeight;
     }
 
-    // El número de asiento aparece una sola vez antes de sus cuentas.
-    if (asiento !== ultimoAsiento) {
-      if (y + 21 > bottom) nuevaPagina();
-
-      doc.font('Helvetica').fontSize(7.5);
-      doc.text('- ' + asiento + ' -', xDetalle, y, {
-        width: wDetalle,
-        align: 'center',
-        lineBreak: false
-      });
-
-      y += 13;
-      ultimoAsiento = asiento;
-    }
-
-    const alto = Math.max(11, altoTexto(detalle, wDetalle - 48));
-
-    if (y + alto > bottom) nuevaPagina();
-
-    doc.font('Helvetica').fontSize(7.5);
-
-    doc.text(codigo, xCodigo, y, {
-      width: wCodigo,
-      lineBreak: false
-    });
-
-    doc.text(detalle, xDetalle, y, {
-      width: wDetalle,
-      lineBreak: false
-    });
-
-    doc.text(numero(row.debe), xDebe, y, {
-      width: wMonto,
-      align: 'right',
-      lineBreak: false
-    });
-
-    doc.text(numero(row.haber), xHaber, y, {
-      width: wMonto,
-      align: 'right',
-      lineBreak: false
-    });
-
-    y += alto + 2;
+    dibujarFila(row, y);
+    y += rowHeight;
   }
 
-  piePagina();
+  doc.font('Helvetica').fontSize(7);
+  doc.text('pag. ' + pagina, left, doc.page.height - 25, {
+    width: tableWidth,
+    align: 'right',
+    lineBreak: false
+  });
+
   doc.end();
 }
 
