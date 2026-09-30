@@ -1,6 +1,6 @@
 .libro-page{padding:28px 30px 40px;max-width:1500px;margin:0 auto}
 .libro-header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:20px}
-.libro-title h1{margin:0;color:#153017;font-size:28px;font-weight:700}.libro-title p{margin:6px 0 0;color:#737373;font-size:14px}
+.libro-title h1{margin:0 0 7px;color:#073674;font-size:clamp(27px,4vw,36px);font-weight:700}.libro-title p{margin:0;color:#777;font-size:14px}
 .libro-actions{display:flex;gap:10px;align-items:center}
 .btn-pdf{display:inline-flex;align-items:center;gap:8px;background:#153017;color:#fff;border:0;border-radius:7px;padding:11px 17px;font-weight:700;cursor:pointer;box-shadow:0 3px 8px rgba(21,48,23,.18)}
 .btn-pdf:hover{background:#1d4521}
