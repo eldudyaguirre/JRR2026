@@ -4,18 +4,7 @@ const PDFDocument = require('pdfkit');
 const TABLA = '"public"."detdiariogeneral"';
 
 async function obtenerDiario() {
-  const sql = `
-    SELECT
-      COALESCE(fecha::text, '') AS fecha,
-      COALESCE(codcuenta::text, '') AS codcuenta,
-      COALESCE(detalle::text, '') AS detalle,
-      COALESCE(debe::text, '') AS debe,
-      COALESCE(haber::text, '') AS haber,
-      COALESCE(numasient::text, '') AS numasient,
-      COALESCE(seqasient::text, '') AS seqasient
-    FROM ${TABLA}
-    ORDER BY fecha, numasient, seqasient
-  `;
+  const sql = 'SELECT * FROM detdiariogeneral ORDER BY numasient, seqasient';
   const result = await pool.query(sql);
   return result.rows;
 }
