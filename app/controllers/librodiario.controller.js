@@ -99,14 +99,14 @@ async function libroDiario(req, res) {
 
     const t = ident(fuente.schema) + '.' + ident(fuente.table);
     const c = fuente.columnasMap;
-    const numExpr = c.numAsiento ? 'COALESCE(' + ident(c.numAsiento) + '::text, \\'\\')' : "''";
+    const numExpr = c.numAsiento ? ident(c.numAsiento) + '::text' : 'NULL::text';
 
     const sql =
       'SELECT ' +
       ident(c.fecha) + '::date AS "fecha", ' +
       numExpr + ' AS "numAsiento", ' +
-      'COALESCE(' + ident(c.codCuenta) + '::text, \\'\\') AS "codCuenta", ' +
-      'COALESCE(' + ident(c.detalle) + '::text, \\'\\') AS "detalle", ' +
+      ident(c.codCuenta) + '::text AS "codCuenta", ' +
+      ident(c.detalle) + '::text AS "detalle", ' +
       'COALESCE(' + ident(c.debe) + '::numeric, 0)::text AS "debe", ' +
       'COALESCE(' + ident(c.haber) + '::numeric, 0)::text AS "haber" ' +
       'FROM ' + t + ' ' +
