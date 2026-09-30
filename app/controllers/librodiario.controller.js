@@ -4,7 +4,7 @@ const PDFDocument = require('pdfkit');
 const TABLA = '"public"."detdiariogeneral"';
 
 async function obtenerDiario() {
-  const sql = \`
+  const sql = `
     SELECT
       fecha::date AS fecha,
       COALESCE(codcuenta::text, '') AS codcuenta,
@@ -13,12 +13,12 @@ async function obtenerDiario() {
       COALESCE(haber::numeric, 0) AS haber,
       COALESCE(numasient::text, '') AS numasient,
       COALESCE(seqasient::text, '') AS seqasient
-    FROM \${TABLA}
+    FROM ${TABLA}
     ORDER BY
       NULLIF(numasient::text, '')::numeric NULLS LAST,
       NULLIF(seqasient::text, '')::numeric NULLS LAST,
       fecha
-  \`;
+  `;
   const result = await pool.query(sql);
   return result.rows;
 }
