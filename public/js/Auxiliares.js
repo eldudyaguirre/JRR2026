@@ -7,8 +7,10 @@ const fecha=v=>v?new Date(v).toLocaleDateString('es-EC',{day:'2-digit',month:'2-
 function enlazarEventos(){
   const btnCuentas=document.getElementById('btn-cuentas');
   const btnConsultar=document.getElementById('btn-consultar');
+  const btnPdf=document.getElementById('btn-pdf');
   if(btnCuentas) btnCuentas.addEventListener('click',e=>{e.preventDefault();abrirCuentas();});
   if(btnConsultar) btnConsultar.addEventListener('click',e=>{e.preventDefault();consultar();});
+  if(btnPdf) btnPdf.addEventListener('click',e=>{e.preventDefault();exportarPDF();});
   const input=document.getElementById('codcuenta');
   if(input) input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();consultar();}});
 }
@@ -63,6 +65,14 @@ function abrirCuentas(){
     });
     estado.textContent='Seleccione una cuenta.';
   }).catch(e=>{ console.error('[AUX CUENTAS]',e); estado.textContent=e.message; alert(e.message); });
+}
+
+function exportarPDF(){
+  const cod=document.getElementById('codcuenta').value.trim();
+  if(!cod){alert('Seleccione una cuenta para generar el PDF.');document.getElementById('codcuenta').focus();return;}
+  const mes=document.getElementById('mes').value;
+  const anio=document.getElementById('anio').value;
+  window.open('/api/auxiliares/pdf?codcuenta='+encodeURIComponent(cod)+'&mes='+encodeURIComponent(mes)+'&anio='+encodeURIComponent(anio),'_blank');
 }
 
 async function consultar(){
