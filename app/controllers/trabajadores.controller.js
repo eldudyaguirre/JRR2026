@@ -20,7 +20,7 @@ async function resumenTrabajadores(req, res) {
     `);
     if (!tabla.rows.length) throw new Error('No se encontró la tabla trabajadores.');
     const { table_schema: esquema, table_name: nombre } = tabla.rows[0];
-    const result = await client.query(`SELECT COUNT(*)::int AS total FROM ${ident(esquema)}.${ident(nombre)}`);
+    const result = await client.query(`SELECT COUNT(*)::int AS total FROM ${ident(esquema)}.${ident(nombre)} WHERE activo = TRUE`);
     return res.json({ tabla: `${esquema}.${nombre}`, total: result.rows[0].total });
   } catch (error) {
     console.error('[TRABAJADORES] Error:', error);
