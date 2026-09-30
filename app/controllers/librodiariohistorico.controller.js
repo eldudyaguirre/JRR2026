@@ -38,9 +38,9 @@ async function pdf(req,res){
     const mes=Number(req.query.mes||act.mes);
     const t=await tablaHistorico();
     const sql=`SELECT * FROM ${ident(t.table_schema)}.${ident(t.table_name)}
-      WHERE "año"::text=$1 AND "mes"::text=$2
+      WHERE "año"::integer=$1 AND "mes"::integer=$2
       ORDER BY "año","mes","numasient","seqasient"`;
-    const rows=(await pool.query(sql,[String(anio),String(mes).padStart(2,'0')])).rows;
+    const rows=(await pool.query(sql,[anio,mes])).rows;
     if(!rows.length)return res.status(404).json({error:'No hay datos de movimientos registrados en el Diario en este período.'});
     const doc=new PDFDocument({size:'A4',margin:0,bufferPages:true,info:{Title:'Diario General Histórico',Author:'JRR CIA.LTDA.'}});
     res.setHeader('Content-Type','application/pdf');res.setHeader('Content-Disposition','inline; filename="diario-general-historico.pdf"');doc.pipe(res);
