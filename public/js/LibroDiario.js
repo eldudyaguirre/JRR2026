@@ -15,13 +15,14 @@ function pintar(){
   let html='';
   for(const r of movimientos){
     const asiento=String(r.numasient||'');
-    if(asiento!==ultimo){
-      html+='<tr class="asiento-row"><td colspan="4"><span class="asiento-badge">Asiento '+escapar(asiento)+'</span></td></tr>';
+    const nuevoAsiento=asiento!==ultimo;
+    if(nuevoAsiento){
+      html+='<tr class="asiento-row"><td colspan="5"><span class="asiento-badge">Asiento '+escapar(asiento)+'</span></td></tr>';
       ultimo=asiento;
     }
     const referencia=!String(r.codcuenta||'').trim();
     html+='<tr>'+
-      '<td class="fecha">'+(asiento!==ultimo ? (r.fecha?fecha(r.fecha):'') : '')+'</td>'+
+      '<td class="fecha">'+(nuevoAsiento ? (r.fecha?fecha(r.fecha):'') : '')+'</td>'+
       '<td class="'+(referencia?'referencia':'codigo')+'">'+escapar(r.codcuenta||'')+'</td>'+
       '<td class="'+(referencia?'referencia':'cuenta')+'">'+escapar(r.detalle||'')+'</td>'+
       '<td class="monto">'+dinero(r.debe)+'</td>'+
