@@ -46,128 +46,151 @@ function generarPDF(rows, res) {
   res.setHeader('Content-Disposition', 'inline; filename="diariogeneral.pdf"');
   doc.pipe(res);
 
-  // El PDF reproduce la misma tabla que se muestra en pantalla.
-  // Los valores se toman directamente de detdiariogeneral y no se
-  // transforman, recortan, justifican ni agrupan.
+  // Presentación tipo Diario General original:
+  // sin cuadrícula, sin bordes por fila y conservando los datos
+  // recibidos de detdiariogeneral.
   const left = 38;
   const right = doc.page.width - 38;
-  const tableWidth = right - left;
+  const width = right - left;
 
-  const columns = [
-    { key: 'fecha',     title: 'Fecha',              width: 78,  align: 'left'  },
-    { key: 'codcuenta', title: 'Código',             width: 92,  align: 'left'  },
-    { key: 'detalle',   title: 'Cuenta / Referencia',width: 275, align: 'left'  },
-    { key: 'debe',      title: 'Debe',               width: 75,  align: 'right' },
-    { key: 'haber',     title: 'Haber',              width: 75,  align: 'right' }
-  ];
+  const xFecha = left;
+  const xCodigo = left + 62;
+  const xDetalle = left + 132;
+  const xDebe = right - 112;
+  const xHaber = right - 56;
 
-  const scale = tableWidth / columns.reduce((sum, col) => sum + col.width, 0);
-  columns.forEach(col => col.width *= scale);
+  const wFecha = 58;
+  const wCodigo = 62;
+  const wDetalle = xDebe - xDetalle - 8;
+  const wMonto = 52;
 
-  const headerHeight = 23;
-  const rowHeight = 22;
-  const top = 72;
-  const bottom = doc.page.height - 38;
+  const headerY = 78;
+  const firstRowY = 93;
+  const bottom = doc.page.height - 40;
+  const lineHeight = 13;
   const fontSize = 8;
 
-  function xFor(index) {
-    let x = left;
-    for (let i = 0; i < index; i++) x += columns[i].width;
-    return x;
-  }
-
-  function dibujarEncabezado() {
-    doc.font('Helvetica-Bold').fontSize(9);
-    doc.text('JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD', left, 25, {
-      width: tableWidth,
-      align: 'left',
-      lineBreak: false
-    });
+  function encabezado() {
+    doc.font('Helvetica-Bold').fontSize(9.5);
+    doc.text(
+      'JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD',
+      left,
+      25,
+      { width, align: 'left', lineBreak: false }
+    );
 
     doc.font('Helvetica-Bold').fontSize(11);
-    doc.text('DIARIO GENERAL', left, 41, {
-      width: tableWidth,
-      align: 'center',
-      lineBreak: false
+    doc.text(
+      'DIARIO GENERAL',
+      left,
+      43,
+      { width, align: 'center', lineBreak: false }
+    );
+
+    doc.font('Helvetica-Bold').fontSize(8);
+    doc.text('FECHA', xFecha, headerY, {width:wFecha, lineBreak:false});
+    doc.text('CODIGO', xCodigo, headerY, {width:wCodigo, lineBreak:false});
+    doc.text('CUENTA / REFERENCIA', xDetalle, headerY, {
+      width:wDetalle, lineBreak:false
+    });
+    doc.text('DEBE', xDebe, headerY, {
+      width:wMonto, align:'right', lineBreak:false
+    });
+    doc.text('HABER', xHaber, headerY, {
+      width:wMonto, align:'right', lineBreak:false
     });
 
-    let x = left;
-
-    columns.forEach(col => {
-      doc.save();
-      doc.rect(x, top, col.width, headerHeight).clip();
-      doc.font('Helvetica-Bold').fontSize(8);
-      doc.text(col.title, x + 6, top + 7, {
-        width: col.width - 12,
-        align: col.align,
-        lineBreak: false
-      });
-      doc.restore();
-
-      doc.rect(x, top, col.width, headerHeight).lineWidth(0.5).stroke();
-      x += col.width;
-    });
-
-    doc.moveTo(left, top + headerHeight)
-      .lineTo(right, top + headerHeight)
-      .lineWidth(0.5)
+    doc.moveTo(left, headerY + 13)
+      .lineTo(right, headerY + 13)
+      .lineWidth(0.6)
       .stroke();
   }
 
-  function dibujarFila(row, y) {
-    let x = left;
-
-    columns.forEach(col => {
-      // String() conserva exactamente el contenido recibido desde PostgreSQL:
-      // no trim, no replace, no conversión de fecha ni de importes.
-      const valor = row[col.key] == null ? '' : String(row[col.key]);
-
-      doc.save();
-      doc.rect(x, y, col.width, rowHeight).clip();
-      doc.font('Helvetica').fontSize(fontSize);
-      doc.text(valor, x + 6, y + 7, {
-        width: col.width - 12,
-        align: col.align,
-        lineBreak: false
-      });
-      doc.restore();
-
-      doc.rect(x, y, col.width, rowHeight).lineWidth(0.35).stroke();
-      x += col.width;
-    });
+  function piePagina(pagina) {
+    doc.font('Helvetica').fontSize(7);
+    doc.text(
+      'pag. ' + pagina,
+      left,
+      doc.page.height - 25,
+      {width, align:'right', lineBreak:false}
+    );
   }
 
-  let y = top + headerHeight;
+  function valor(row, campo) {
+    return row[campo] == null ? '' : String(row[campo]);
+  }
+
+  function altoDetalle(texto) {
+    return Math.max(
+      lineHeight,
+      doc.heightOfString(texto, {
+        width:wDetalle,
+        font:'Helvetica',
+        fontSize
+      })
+    );
+  }
+
+  let y = firstRowY;
   let pagina = 1;
 
-  dibujarEncabezado();
+  encabezado();
 
   for (const row of rows) {
-    if (y + rowHeight > bottom) {
-      doc.font('Helvetica').fontSize(7);
-      doc.text('pag. ' + pagina, left, doc.page.height - 25, {
-        width: tableWidth,
-        align: 'right',
-        lineBreak: false
-      });
+    const fecha = valor(row, 'fecha');
+    const codigo = valor(row, 'codcuenta');
+    const detalle = valor(row, 'detalle');
+    const debe = valor(row, 'debe');
+    const haber = valor(row, 'haber');
 
+    const alto = altoDetalle(detalle);
+
+    if (y + alto > bottom) {
+      piePagina(pagina);
       doc.addPage();
       pagina++;
-      dibujarEncabezado();
-      y = top + headerHeight;
+      encabezado();
+      y = firstRowY;
     }
 
-    dibujarFila(row, y);
-    y += rowHeight;
+    doc.font('Helvetica').fontSize(fontSize);
+
+    // Sin bordes, sin justificación del contenido y sin transformar
+    // los valores provenientes de PostgreSQL.
+    doc.text(fecha, xFecha, y, {
+      width:wFecha,
+      align:'left',
+      lineBreak:false
+    });
+
+    doc.text(codigo, xCodigo, y, {
+      width:wCodigo,
+      align:'left',
+      lineBreak:false
+    });
+
+    doc.text(detalle, xDetalle, y, {
+      width:wDetalle,
+      align:'left',
+      lineBreak:false
+    });
+
+    doc.text(debe, xDebe, y, {
+      width:wMonto,
+      align:'right',
+      lineBreak:false
+    });
+
+    doc.text(haber, xHaber, y, {
+      width:wMonto,
+      align:'right',
+      lineBreak:false
+    });
+
+    y += alto + 1;
   }
 
-  doc.font('Helvetica').fontSize(7);
-  doc.text('pag. ' + pagina, left, doc.page.height - 25, {
-    width: tableWidth,
-    align: 'right',
-    lineBreak: false
-  });
-
+  piePagina(pagina);
   doc.end();
 }
 
