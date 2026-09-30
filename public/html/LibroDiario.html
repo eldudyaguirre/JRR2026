@@ -10,8 +10,25 @@
 </head>
 <body>
 <div class="layout">
-<aside class="sidebar" id="sidebar"></aside>
-<div class="overlay" id="overlay"></div>
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-top"><div class="brand"><img class="brand-logo" src="/img/logonuevov2.svg" alt="JRR2026"></div><button class="close-btn" onclick="cerrarMenu()" aria-label="Cerrar menú">×</button></div>
+<div class="profile"><div class="profile-avatar"><img src="/img/usuario.svg" alt="Usuario" id="avatar"></div><div class="profile-info"><div class="profile-name" id="profile-name">Usuario</div><div class="profile-user" id="profile-user">Cargando...</div></div></div>
+<div class="menu-title">Menú principal</div>
+<nav aria-label="Menú principal"><ul class="menu">
+<li><a href="/html/frmmenprinci.html"><i class="fi fi-rr-home icon"></i><span>Inicio</span></a></li>
+<li class="menu-group open" data-segapp="ADMINISTRATIVO"><button type="button" class="menu-parent" onclick="toggleSubmenu(this)" aria-expanded="true"><i class="fi fi-rr-briefcase icon"></i><span>Administrativo</span><i class="fi fi-rr-angle-small-down submenu-arrow"></i></button>
+<ul class="submenu">
+<li><a href="/html/ResumenAdm.html">Resumen</a></li><li style="height:1px"></li>
+<li><a href="/html/Proveedores.html">Proveedores</a></li><li><a href="/html/FrmCompras.html">Compras</a></li><li><a href="/html/FrmCuePagar.html">Cuentas por pagar</a></li><li style="height:1px"></li>
+<li><a href="/html/Clientes.html">Clientes</a></li><li><a href="/html/FrmVentas.html">Ventas</a></li><li><a href="/html/FrmCueCobrar.html">Cuentas por cobrar</a></li><li style="height:1px"></li>
+<li><a href="/html/FrmBalGeneral.html">Balance General</a></li><li><a href="/html/FrmBalResul.html">Balance de Resultados</a></li><li><a href="/html/LibroDiario.html" class="active" aria-current="page">Libro Diario</a></li><li style="height:1px"></li>
+<li><a href="#trabajadores">Trabajadores</a></li><li><a href="#roles">Rol de Pagos</a></li>
+</ul></li>
+<li data-segapp="ADMINISTRATIVO"><a href="#configuracion"><i class="fi fi-rr-settings icon"></i><span>Configuración</span></a></li>
+</ul></nav>
+<div class="sidebar-bottom"><button class="logout-link" onclick="cerrarSesion()"><i class="fi fi-rr-sign-out-alt icon"></i><span>Cerrar sesión</span></button></div>
+</aside>
+<div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
 <section class="content">
 <header class="topbar">
 <button class="mobile-menu" onclick="document.getElementById('sidebar')?.classList.add('open');document.getElementById('overlay')?.classList.add('show')"><i class="fi fi-rr-menu-burger"></i></button>
@@ -45,6 +62,6 @@
 </main>
 </section>
 </div>
-<script src="/js/LibroDiario.js?v=20260930b"></script>
+<script src="/js/frmmenprinci.js?v=20260908"></script><script src="/js/LibroDiario.js?v=20260930c"></script>
 </body>
 </html>
