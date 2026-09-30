@@ -30,12 +30,10 @@ async function cargarPeriodo(){
   anio.value=String(actual.anio);
 }
 
-async function abrirCuentas(){
+function abrirCuentas(){
   const estado=document.getElementById('estado');
-  try{
-    estado.textContent='Cargando plan de cuentas...';
-    const r=await fetch('/api/auxiliares/cuentas?_='+Date.now());
-    const d=await r.json();
+  estado.textContent='Cargando plan de cuentas...';
+  fetch('/api/auxiliares/cuentas?_='+Date.now()).then(async r=>{ const d=await r.json();
     if(!r.ok) throw new Error(d.detail||d.error||'No se pudo cargar el plan de cuentas.');
     const cuentas=d.cuentas||[];
     if(!cuentas.length){estado.textContent='No existen cuentas disponibles.';return;}
@@ -56,11 +54,7 @@ async function abrirCuentas(){
       estado.textContent='Cuenta seleccionada. Presione Consultar.';
     });
     estado.textContent='Seleccione una cuenta.';
-  }catch(e){
-    console.error('[AUX CUENTAS]',e);
-    estado.textContent=e.message;
-    alert(e.message);
-  }
+  }).catch(e=>{ console.error('[AUX CUENTAS]',e); estado.textContent=e.message; alert(e.message); });
 }
 
 async function consultar(){
