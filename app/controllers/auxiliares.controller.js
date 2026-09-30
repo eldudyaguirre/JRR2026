@@ -52,57 +52,132 @@ function money(v){return Number(v||0).toLocaleString('en-US',{minimumFractionDig
 function dateText(v){if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('es-EC',{day:'2-digit',month:'2-digit',year:'numeric'});}
 
 function generarPDF(data,res){
-  const doc=new PDFDocument({size:'A4',margin:0,bufferPages:true,info:{Title:'Auxiliar Contable',Author:'JRR CIA.LTDA.'}});
+  const doc=new PDFDocument({
+    size:'A4',
+    layout:'landscape',
+    margin:0,
+    bufferPages:true,
+    info:{Title:'Auxiliar Contable',Author:'JRR CIA.LTDA.'}
+  });
+
   res.setHeader('Content-Type','application/pdf');
   res.setHeader('Content-Disposition','inline; filename="auxiliar-contable.pdf"');
   doc.pipe(res);
-  const left=38,right=doc.page.width-38,width=right-left;
-  const xFecha=left,xAsiento=left+58,xRef=left+105,xDebe=right-145,xHaber=right-92,xSaldo=right-38;
-  const wFecha=54,wAsiento=42,wRef=xDebe-xRef-6,wNum=68;
-  const top=78,bottom=doc.page.height-42,line=13;
-  let y=92,page=1;
-  const encabezado=()=>{
-    doc.font('Helvetica-Bold').fontSize(10).text('JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD',left,25,{width,lineBreak:false});
-    doc.font('Helvetica-Bold').fontSize(12).text('AUXILIAR CONTABLE',left,43,{width,align:'center',lineBreak:false});
+
+  const left=30;
+  const right=doc.page.width-30;
+  const width=right-left;
+
+  // Columnas separadas para evitar que las referencias invadan los valores.
+  const wFecha=68;
+  const wAsiento=52;
+  const wDebe=78;
+  const wHaber=78;
+  const wSaldo=82;
+  const wRef=width-wFecha-wAsiento-wDebe-wHaber-wSaldo;
+
+  const xFecha=left;
+  const xAsiento=xFecha+wFecha;
+  const xRef=xAsiento+wAsiento;
+  const xDebe=xRef+wRef;
+  const xHaber=xDebe+wDebe;
+  const xSaldo=xHaber+wHaber;
+
+  const headerY=78;
+  const firstY=95;
+  const bottom=doc.page.height-42;
+  const lineHeight=11;
+  const fontSize=7.5;
+  let y=firstY;
+  let page=1;
+
+  function encabezado(){
+    doc.font('Helvetica-Bold').fontSize(10)
+      .text('JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD',left,25,{width,lineBreak:false});
+
+    doc.font('Helvetica-Bold').fontSize(12)
+      .text('AUXILIAR CONTABLE',left,43,{width,align:'center',lineBreak:false});
+
     doc.font('Helvetica-Bold').fontSize(8.5).text('CUENTA:',left,61,{lineBreak:false});
-    doc.font('Helvetica').fontSize(8.5).text(String(data.cuenta.codcuenta||''),left+42,61,{lineBreak:false});
-    doc.font('Helvetica-Bold').text('NOMBRE:',left+145,61,{lineBreak:false});
-    doc.font('Helvetica').text(String(data.cuenta.nomcuenta||''),left+190,61,{width:width-190,lineBreak:false});
-    doc.font('Helvetica-Bold').text('PERÍODO:',right-120,61,{width:55,lineBreak:false});
+    doc.font('Helvetica').text(String(data.cuenta.codcuenta||''),left+42,61,{lineBreak:false});
+
+    doc.font('Helvetica-Bold').text('NOMBRE:',left+190,61,{lineBreak:false});
+    doc.font('Helvetica').text(String(data.cuenta.nomcuenta||''),left+235,61,{width:width-360,lineBreak:false});
+
+    doc.font('Helvetica-Bold').text('PERÍODO:',right-125,61,{width:58,lineBreak:false});
     doc.font('Helvetica').text(String(data.mes).padStart(2,'0')+'/'+data.anio,right-62,61,{width:62,align:'right',lineBreak:false});
-    doc.font('Helvetica-Bold').fontSize(8).text('FECHA',xFecha,top,{width:wFecha,lineBreak:false});
-    doc.text('ASIENTO',xAsiento,top,{width:wAsiento,lineBreak:false});
-    doc.text('REFERENCIA',xRef,top,{width:wRef,lineBreak:false});
-    doc.text('DEBE',xDebe,top,{width:wNum,align:'right',lineBreak:false});
-    doc.text('HABER',xHaber,top,{width:wNum,align:'right',lineBreak:false});
-    doc.text('SALDO',xSaldo,top,{width:38,align:'right',lineBreak:false});
-    doc.moveTo(left,top+13).lineTo(right,top+13).lineWidth(.6).stroke();
-  };
-  const pie=()=>{doc.font('Helvetica').fontSize(7).text('pag. '+page,left,doc.page.height-25,{width,align:'right',lineBreak:false});};
+
+    doc.font('Helvetica-Bold').fontSize(8);
+    doc.text('FECHA',xFecha,headerY,{width:wFecha,lineBreak:false});
+    doc.text('ASIENTO',xAsiento,headerY,{width:wAsiento,lineBreak:false});
+    doc.text('REFERENCIA',xRef,headerY,{width:wRef,lineBreak:false});
+    doc.text('DEBE',xDebe,headerY,{width:wDebe,align:'right',lineBreak:false});
+    doc.text('HABER',xHaber,headerY,{width:wHaber,align:'right',lineBreak:false});
+    doc.text('SALDO',xSaldo,headerY,{width:wSaldo,align:'right',lineBreak:false});
+
+    doc.moveTo(left,headerY+13).lineTo(right,headerY+13).lineWidth(.6).stroke();
+  }
+
+  function pie(){
+    doc.font('Helvetica').fontSize(7)
+      .text('pag. '+page,left,doc.page.height-25,{width,align:'right',lineBreak:false});
+  }
+
+  function nuevaPagina(){
+    pie();
+    doc.addPage();
+    page++;
+    encabezado();
+    y=firstY;
+  }
+
   encabezado();
-  doc.font('Helvetica').fontSize(8);
-  doc.text('SALDO INICIAL',xRef,y,{width:wRef,lineBreak:false});
-  doc.text(money(data.saldoInicial),xSaldo-30,y,{width:68,align:'right',lineBreak:false});
-  y+=line+2;
+
+  // Saldo inicial.
+  doc.font('Helvetica-Bold').fontSize(fontSize)
+    .text('SALDO INICIAL',xRef,y,{width:wRef,lineBreak:false});
+  doc.font('Helvetica').fontSize(fontSize)
+    .text(money(data.saldoInicial),xSaldo,y,{width:wSaldo,align:'right',lineBreak:false});
+  y+=lineHeight+5;
+
   for(const r of data.movimientos){
-    if(y+line>bottom){pie();doc.addPage();page++;encabezado();y=92;}
-    const saldo=r.valsalpar==null?'':money(r.valsalpar);
+    const referencia=String(r.referencia??'');
+    const refHeight=Math.max(
+      lineHeight,
+      doc.heightOfString(referencia,{width:wRef,font:'Helvetica',fontSize})
+    );
+    const rowHeight=refHeight+3;
+
+    if(y+rowHeight>bottom) nuevaPagina();
+
+    doc.font('Helvetica').fontSize(fontSize);
+
     doc.text(dateText(r.fecmovimi),xFecha,y,{width:wFecha,lineBreak:false});
     doc.text(String(r.numasient??''),xAsiento,y,{width:wAsiento,lineBreak:false});
-    doc.text(String(r.referencia??''),xRef,y,{width:wRef,lineBreak:false});
-    doc.text(money(r.valmovdeb),xDebe,y,{width:wNum,align:'right',lineBreak:false});
-    doc.text(money(r.valmovhab),xHaber,y,{width:wNum,align:'right',lineBreak:false});
-    doc.text(saldo,xSaldo-30,y,{width:68,align:'right',lineBreak:false});
-    y+=line;
+
+    // La referencia se ajusta dentro de su propia columna.
+    doc.text(referencia,xRef,y,{width:wRef,lineBreak:true});
+
+    doc.text(money(r.valmovdeb),xDebe,y,{width:wDebe,align:'right',lineBreak:false});
+    doc.text(money(r.valmovhab),xHaber,y,{width:wHaber,align:'right',lineBreak:false});
+    doc.text(r.valsalpar==null?'':money(r.valsalpar),xSaldo,y,{width:wSaldo,align:'right',lineBreak:false});
+
+    y+=rowHeight;
   }
-  if(y+line*4>bottom){pie();doc.addPage();page++;encabezado();y=92;}
-  doc.moveTo(left,y+2).lineTo(right,y+2).lineWidth(.6).stroke();y+=9;
-  doc.font('Helvetica-Bold').fontSize(8);
-  doc.text('TOTALES',xRef,y,{width:wRef,lineBreak:false});
-  doc.text(money(data.totalDebe),xDebe,y,{width:wNum,align:'right',lineBreak:false});
-  doc.text(money(data.totalHaber),xHaber,y,{width:wNum,align:'right',lineBreak:false});
-  doc.text(money(data.saldoFinal),xSaldo-30,y,{width:68,align:'right',lineBreak:false});
-  pie();doc.end();
+
+  if(y+lineHeight*3>bottom) nuevaPagina();
+
+  doc.moveTo(left,y+2).lineTo(right,y+2).lineWidth(.6).stroke();
+  y+=9;
+
+  doc.font('Helvetica-Bold').fontSize(fontSize)
+    .text('TOTALES',xRef,y,{width:wRef,lineBreak:false})
+    .text(money(data.totalDebe),xDebe,y,{width:wDebe,align:'right',lineBreak:false})
+    .text(money(data.totalHaber),xHaber,y,{width:wHaber,align:'right',lineBreak:false})
+    .text(money(data.saldoFinal),xSaldo,y,{width:wSaldo,align:'right',lineBreak:false});
+
+  pie();
+  doc.end();
 }
 
 async function pdf(req,res){
