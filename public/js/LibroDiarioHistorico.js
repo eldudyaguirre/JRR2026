@@ -21,7 +21,7 @@ async function consultar(){
   const d=await r.json();if(!r.ok)throw new Error(d.detail||d.error||'No se pudo consultar.');
   contador.textContent=d.rows.length+' movimientos';
   if(!d.rows.length){estado.textContent='No hay datos de movimientos registrados en el Diario en este período.';return;}
-  body.innerHTML=d.rows.map(x=>'<tr><td>'+esc(x.fecha)+'</td><td>'+esc(x.CodCuenta)+'</td><td>'+esc(x.detalle)+'</td><td class="num">'+esc(x.Debe)+'</td><td class="num">'+esc(x.Haber)+'</td></tr>').join('');
+  body.innerHTML=d.rows.map(x=>'<tr><td>'+esc(x.fecha)+'</td><td>'+esc(x.codcuenta)+'</td><td>'+esc(x.detalle)+'</td><td class="num">'+esc(x.debe)+'</td><td class="num">'+esc(x.haber)+'</td></tr>').join('');
   estado.textContent='Período '+String(d.mes).padStart(2,'0')+'/'+d.anio;
  }catch(e){contador.textContent='';estado.textContent=e.message;}
 }
