@@ -21,7 +21,7 @@ function pintar(){
     }
     const referencia=!String(r.codcuenta||'').trim();
     html+='<tr>'+
-      '<td class="fecha">'+(r.fecha?fecha(r.fecha):'')+'</td>'+
+      '<td class="fecha">'+(asiento!==ultimo ? (r.fecha?fecha(r.fecha):'') : '')+'</td>'+
       '<td class="'+(referencia?'referencia':'codigo')+'">'+escapar(r.codcuenta||'')+'</td>'+
       '<td class="'+(referencia?'referencia':'cuenta')+'">'+escapar(r.detalle||'')+'</td>'+
       '<td class="monto">'+dinero(r.debe)+'</td>'+
