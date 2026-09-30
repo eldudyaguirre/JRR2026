@@ -50,11 +50,10 @@ async function pdf(req,res){
       });
     }
 
-    // A4 horizontal para que las cinco columnas entren completas
-    // sin que HABER quede fuera de la página.
+    // El Diario General se imprime en A4 vertical.
     const doc=new PDFDocument({
       size:'A4',
-      layout:'landscape',
+      layout:'portrait',
       margin:0,
       bufferPages:true,
       info:{Title:'Diario General Histórico',Author:'JRR CIA.LTDA.'}
@@ -64,15 +63,16 @@ async function pdf(req,res){
     res.setHeader('Content-Disposition','inline; filename="diario-general-historico.pdf"');
     doc.pipe(res);
 
-    const left=35;
-    const right=doc.page.width-35;
+    const left=30;
+    const right=doc.page.width-30;
     const width=right-left;
 
-    // Distribución fija: Fecha | Código | Referencia | Debe | Haber
-    const wFecha=78;
-    const wCodigo=95;
-    const wDebe=82;
-    const wHaber=82;
+    // Distribución vertical: FECHA | CODIGO | CUENTA / REFERENCIA | DEBE | HABER
+    // La referencia recibe el espacio principal, como en el reporte original.
+    const wFecha=70;
+    const wCodigo=82;
+    const wDebe=72;
+    const wHaber=72;
     const wReferencia=width-wFecha-wCodigo-wDebe-wHaber;
 
     const xFecha=left;
@@ -81,25 +81,25 @@ async function pdf(req,res){
     const xDebe=xReferencia+wReferencia;
     const xHaber=xDebe+wDebe;
 
-    const headerY=82;
-    const firstY=101;
+    const headerY=78;
+    const firstY=96;
     const bottom=doc.page.height-42;
-    const lineHeight=10;
-    const fontSize=7.5;
+    const lineHeight=9;
+    const fontSize=7.2;
 
     let y=firstY;
     let page=1;
 
     function encabezado(){
-      doc.font('Helvetica-Bold').fontSize(10)
+      doc.font('Helvetica-Bold').fontSize(9)
         .text('JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD',
           left,28,{width,lineBreak:false});
 
-      doc.font('Helvetica-Bold').fontSize(17)
+      doc.font('Helvetica-Bold').fontSize(16)
         .text('DIARIO GENERAL',
-          left,50,{width,align:'center',lineBreak:false});
+          left,48,{width,align:'center',lineBreak:false});
 
-      doc.font('Helvetica-Bold').fontSize(9);
+      doc.font('Helvetica-Bold').fontSize(8.5);
       doc.text('FECHA',xFecha,headerY,{width:wFecha,lineBreak:false});
       doc.text('CODIGO',xCodigo,headerY,{width:wCodigo,lineBreak:false});
       doc.text('CUENTA / REFERENCIA',xReferencia,headerY,
@@ -109,8 +109,8 @@ async function pdf(req,res){
       doc.text('HABER',xHaber,headerY,
         {width:wHaber,align:'right',lineBreak:false});
 
-      doc.moveTo(left,headerY+15)
-        .lineTo(right,headerY+15)
+      doc.moveTo(left,headerY+14)
+        .lineTo(right,headerY+14)
         .lineWidth(.6)
         .stroke();
 
@@ -120,7 +120,7 @@ async function pdf(req,res){
     function pie(){
       doc.font('Helvetica').fontSize(7)
         .text('Página '+page,left,doc.page.height-25,
-          {width,align:'right',lineBreak:false});
+          {width,lineBreak:false,align:'right'});
     }
 
     function nuevaPagina(){
@@ -133,13 +133,14 @@ async function pdf(req,res){
     encabezado();
 
     for(const r of rows){
-      // Se conserva exactamente el contenido de detalle.
-      // No se trimmea, justifica ni se reemplazan espacios.
+      // Se conserva el contenido de la base sin trim, replace ni justificación.
+      const fecha=String(r.fecha??'');
+      const codigo=String(r.codcuenta??'');
       const referencia=String(r.detalle??'');
 
       doc.font('Helvetica').fontSize(fontSize);
 
-      const referenciaHeight=Math.max(
+      const refHeight=Math.max(
         lineHeight,
         doc.heightOfString(referencia,{
           width:wReferencia,
@@ -148,7 +149,7 @@ async function pdf(req,res){
         })
       );
 
-      const rowHeight=referenciaHeight+3;
+      const rowHeight=refHeight+2;
 
       if(y+rowHeight>bottom){
         nuevaPagina();
@@ -156,20 +157,24 @@ async function pdf(req,res){
 
       doc.font('Helvetica').fontSize(fontSize);
 
-      doc.text(String(r.fecha??''),xFecha,y,
-        {width:wFecha,lineBreak:false});
+      doc.text(fecha,xFecha,y,{width:wFecha,lineBreak:false});
+      doc.text(codigo,xCodigo,y,{width:wCodigo,lineBreak:false});
+      doc.text(referencia,xReferencia,y,{
+        width:wReferencia,
+        lineBreak:true
+      });
 
-      doc.text(String(r.codcuenta??''),xCodigo,y,
-        {width:wCodigo,lineBreak:false});
+      doc.text(money(r.debe),xDebe,y,{
+        width:wDebe,
+        align:'right',
+        lineBreak:false
+      });
 
-      doc.text(referencia,xReferencia,y,
-        {width:wReferencia,lineBreak:true});
-
-      doc.text(money(r.debe),xDebe,y,
-        {width:wDebe,align:'right',lineBreak:false});
-
-      doc.text(money(r.haber),xHaber,y,
-        {width:wHaber,align:'right',lineBreak:false});
+      doc.text(money(r.haber),xHaber,y,{
+        width:wHaber,
+        align:'right',
+        lineBreak:false
+      });
 
       y+=rowHeight;
     }
