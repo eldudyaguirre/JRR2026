@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/img/logonuevov2.svg">
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+<link rel="stylesheet" href="/css/FrmBalResul.css?v=20260907">
+<title>Administrativo - Balance de Resultados</title>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-top"><div class="brand"><img class="brand-logo" src="/img/logonuevov2.svg" alt="Avicola y Porcina Luisin"></div><button class="close-btn" onclick="cerrarMenu()">×</button></div>
+<div class="profile"><div class="profile-avatar"><img src="/img/usuario.svg" alt="Usuario"></div><div><div class="profile-name" id="profile-name">Usuario</div><div class="profile-user" id="profile-user">Cargando...</div></div></div>
+<div class="menu-title">Menú principal</div>
+<nav><ul class="menu">
+<li><a href="/html/frmmenprinci.html"><i class="fi fi-rr-home icon"></i><span>Inicio</span></a></li>
+<li class="menu-group"><button type="button" class="menu-parent" onclick="toggleSubmenu(this)"><i class="fi fi-rr-feather icon"></i><span>Avícola</span><i class="fi fi-rr-angle-small-down"></i></button><ul class="submenu"><li><a href="#resumen-avicola">Resumen</a></li><li><a href="#granja1">Granja 1</a></li><li><a href="#granja2">Granja 2</a></li><li><a href="#pesaje-avicola">Pesaje</a></li><li><a href="#reportes-avicola">Reportes</a></li><li><a href="#parametros-avicola">Parámetros</a></li></ul></li>
+<li class="menu-group"><button type="button" class="menu-parent" onclick="toggleSubmenu(this)"><i class="fi fi-rr-pig icon"></i><span>Porcina</span><i class="fi fi-rr-angle-small-down"></i></button><ul class="submenu"><li><a href="#resumen-porcina">Resumen</a></li><li><a href="#granja1-porcina">Granja 1</a></li><li><a href="#granja2-porcina">Granja 2</a></li><li><a href="#pesaje-porcina">Pesaje</a></li><li><a href="#reportes-porcina">Reportes</a></li><li><a href="#parametros-porcina">Parámetros</a></li></ul></li>
+<li class="menu-group"><button type="button" class="menu-parent" onclick="toggleSubmenu(this)"><i class="fi fi-rr-industry-windows icon"></i><span>Fábrica</span><i class="fi fi-rr-angle-small-down"></i></button><ul class="submenu"><li><a href="#resumen-fabrica">Resumen</a></li><li><a href="#inventario-fabrica">Inventario</a></li><li><a href="#items-fabrica">Items</a></li><li><a href="#produccion-fabrica">Producción</a></li><li><a href="#ordenes-compra-fabrica">Órdenes de compra</a></li></ul></li>
+<li class="menu-group open"><button type="button" class="menu-parent" onclick="toggleSubmenu(this)" aria-expanded="true"><i class="fi fi-rr-briefcase icon"></i><span>Administrativo</span><i class="fi fi-rr-angle-small-down"></i></button><ul class="submenu">
+<li><a href="/html/ResumenAdm.html">Resumen</a></li><li style="height:1px;background:#e1e5ea;margin:6px 10px;"></li>
+<li><a href="/html/Proveedores.html">Proveedores</a></li><li><a href="/html/FrmCompras.html">Compras</a></li><li><a href="/html/FrmCuePagar.html">Cuentas por pagar</a></li><li style="height:1px;background:#e1e5ea;margin:6px 10px;"></li>
+<li><a href="/html/Clientes.html">Clientes</a></li><li><a href="/html/FrmVentas.html">Ventas</a></li><li><a href="/html/FrmCueCobrar.html">Cuentas por cobrar</a></li><li style="height:1px;background:#e1e5ea;margin:6px 10px;"></li>
+<li><a href="/html/FrmBalGeneral.html">Balance General</a></li><li><a href="/html/FrmBalResul.html" class="active" aria-current="page">Balance de Resultados</a></li><li style="height:1px;background:#e1e5ea;margin:6px 10px;"></li>
+<li><a href="#trabajadores">Trabajadores</a></li><li><a href="#roles">Rol de Pagos</a></li>
+</ul></li>
+<li><a href="#configuracion"><i class="fi fi-rr-settings icon"></i><span>Configuración</span></a></li>
+</ul></nav>
+<div class="sidebar-bottom"><button class="logout-link" onclick="cerrarSesion()"><i class="fi fi-rr-sign-out-alt icon"></i><span>Cerrar sesión</span></button></div>
+</aside>
+<div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
+<section class="content">
+<header class="topbar"><button class="mobile-menu" onclick="abrirMenu()"><i class="fi fi-rr-menu-burger"></i></button><div class="topbar-title">Administrativo <span>Balance de Resultados</span></div></header>
+<main class="page">
+<div class="acciones"><button class="btn btn-print" id="btn-print" onclick="imprimir()" disabled><i class="fi fi-rr-print"></i> Imprimir</button><button class="btn btn-pdf" id="btn-pdf" onclick="exportarPDF()" disabled><i class="fi fi-rr-file-pdf"></i> Exportar PDF</button>
+<div class="filtros"><label for="nivel">Nivel Balance</label><select id="nivel"><option>Nivel 1</option><option>Nivel 2</option><option>Nivel 3</option><option>Nivel 4</option><option>Nivel 5</option><option selected>Nivel 6</option></select><label for="mes">Mes</label><select id="mes"></select><label for="anio">Año</label><select id="anio"></select></div></div>
+<section class="paper" id="paper">
+<header class="paper-header"><div class="empresa" id="empresa">Complete Accounting System - CONTABILIDAD</div><h1>BALANCE DE RESULTADOS</h1><div class="periodo" id="periodo">PERIODO FISCAL: --/---- Nivel 6</div></header>
+<div class="column-head"><span>CUENTAS</span><span>VALORES</span></div>
+<div class="result-grid">
+<section class="result-box ingresos-box"><div class="box-title">INGRESOS</div><div class="account-list" id="ingresos"></div><div class="section-total"><span>TOTAL INGRESOS ACUMULADO:</span><b id="total-ingresos">0.00</b></div><div class="section-total"><span>TOTAL INGRESOS PERÍODO:</span><b id="total-ingresos-periodo">0.00</b></div></section>
+<section class="result-box gastos-box"><div class="box-title">COSTOS Y GASTOS</div><div class="account-list" id="gastos"></div><div class="section-total"><span>TOTAL GASTOS ACUMULADO:</span><b id="total-gastos">0.00</b></div><div class="section-total"><span>TOTAL GASTOS PERÍODO:</span><b id="total-gastos-periodo">0.00</b></div></section>
+</div>
+<section class="resumen-resultados"><div><b>TOTAL INGRESOS:</b><span>ACUMULADO: <strong id="res-ing-acum">0.00</strong></span><span>PERÍODO: <strong id="res-ing-per">0.00</strong></span></div><div><b>TOTAL GASTOS:</b><span>ACUMULADO: <strong id="res-gas-acum">0.00</strong></span><span>PERÍODO: <strong id="res-gas-per">0.00</strong></span></div><div class="resultado"><b>RESULTADO DEL EJERCICIO:</b><span id="resultado-ejercicio">0.00</span></div><div class="resultado periodo-res"><b>RESULTADO DEL PERÍODO:</b><span id="resultado-periodo">0.00</span></div></section>
+</section></main></section></div>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="/js/FrmBalResul.js?v=20260907"></script>
+</body></html>

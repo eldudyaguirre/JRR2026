@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/img/logonuevov2.svg">
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+<link rel="stylesheet" href="/css/frmmenprinci.css?v=20260908">
+<link rel="stylesheet" href="/css/FrmRepArea.css?v=20260908">
+<title>Administrativo - Reporte por Áreas</title>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-top"><div class="brand"><img class="brand-logo" src="/img/logonuevov2.svg" alt="Avicola y Porcina Luisin"></div><button class="close-btn" onclick="cerrarMenu()">×</button></div>
+<div class="profile"><div class="profile-avatar"><img src="/img/usuario.svg" alt="Usuario"></div><div class="profile-info"><div class="profile-name" id="profile-name">Usuario</div><div class="profile-user" id="profile-user">Cargando...</div></div></div>
+<div class="menu-title">Menú principal</div>
+<nav><ul class="menu"><li><a href="/html/frmmenprinci.html"><i class="fi fi-rr-home icon"></i><span>Inicio</span></a></li><li class="menu-group" data-segapp="ADMINISTRATIVO"><button type="button" class="menu-parent" onclick="toggleSubmenu(this)"><i class="fi fi-rr-briefcase icon"></i><span>Administrativo</span><i class="fi fi-rr-angle-small-down submenu-arrow"></i></button><ul class="submenu"><li><a href="/html/ResumenAdm.html">Resumen</a></li></ul></li></ul></nav>
+<div class="sidebar-bottom"><button class="logout-link" onclick="cerrarSesion()"><i class="fi fi-rr-sign-out-alt icon"></i><span>Cerrar sesión</span></button></div>
+</aside>
+<div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
+<section class="content">
+<header class="topbar"><button class="mobile-menu" onclick="abrirMenu()"><i class="fi fi-rr-menu-burger"></i></button><div class="topbar-title">Administrativo <span>Reporte por Áreas</span></div></header>
+<main class="page">
+<div><h1 class="heading">Reporte por Áreas</h1><p class="subtitle">Detalle de compras, notas de venta y órdenes directas por área de trabajo.</p></div>
+<section class="filtros">
+<div class="campo"><label for="area">Área de trabajo</label><select id="area"><option value="">Todas las áreas</option></select></div>
+<div class="campo"><label for="inicio">Fecha inicial</label><input type="date" id="inicio"></div>
+<div class="campo"><label for="fin">Fecha final</label><input type="date" id="fin"></div>
+<button class="btn" id="btn-consultar"><i class="fi fi-rr-search"></i> Consultar</button>
+</section>
+<section class="resumen">
+<div class="resumen-card"><div class="resumen-label">MOVIMIENTOS</div><div class="resumen-value" id="total-registros">0</div></div>
+<div class="resumen-card"><div class="resumen-label">TOTAL SIN IVA</div><div class="resumen-value" id="sum-siniva">0.00</div></div>
+<div class="resumen-card"><div class="resumen-label">TOTAL CON IVA</div><div class="resumen-value" id="sum-coniva">0.00</div></div>
+<div class="resumen-card"><div class="resumen-label">IVA</div><div class="resumen-value" id="sum-iva">0.00</div></div>
+<div class="resumen-card"><div class="resumen-label">TOTAL GENERAL</div><div class="resumen-value" id="sum-total">0.00</div></div>
+</section>
+<section class="reporte-panel">
+<div class="panel-head"><div><h2 id="area-titulo">Todas las áreas</h2><p>Período: <span id="periodo">--</span></p></div><div class="acciones"><button class="btn btn-pdf" id="btn-pdf"><i class="fi fi-rr-file-pdf"></i> Exportar PDF</button><button class="btn btn-sec" id="btn-csv"><i class="fi fi-rr-file-csv"></i> CSV</button></div><span class="estado" id="estado">Cargando...</span></div>
+<div class="tabla-wrap"><table class="reporte-table"><thead><tr><th>Fecha</th><th>RUC/Cédula</th><th>Nombre</th><th>Número</th><th>Tipo</th><th>Tot. sin IVA</th><th>Tot. con IVA</th><th>IVA</th><th>Total</th><th>Área</th><th>Origen</th></tr></thead><tbody id="reporte-body"><tr><td colspan="11" class="loading">Consultando movimientos...</td></tr></tbody></table></div>
+</section>
+</main></section></div>
+<script src="/js/frmmenprinci.js?v=20260908"></script><script src="/js/FrmRepArea.js?v=20260908"></script>
+</body></html>
