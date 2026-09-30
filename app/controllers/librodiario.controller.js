@@ -6,7 +6,7 @@ const TABLA = '"public"."detdiariogeneral"';
 async function obtenerDiario() {
   const sql = `
     SELECT
-      fecha::date AS fecha,
+      COALESCE(fecha::text, '') AS fecha,
       COALESCE(codcuenta::text, '') AS codcuenta,
       COALESCE(detalle::text, '') AS detalle,
       COALESCE(debe::text, '') AS debe,
@@ -14,12 +14,7 @@ async function obtenerDiario() {
       COALESCE(numasient::text, '') AS numasient,
       COALESCE(seqasient::text, '') AS seqasient
     FROM ${TABLA}
-    ORDER BY
-      CASE WHEN trim(numasient::text) ~ '^[0-9]+$'
-        THEN trim(numasient::text)::bigint ELSE NULL END NULLS LAST,
-      CASE WHEN trim(seqasient::text) ~ '^[0-9]+$'
-        THEN trim(seqasient::text)::bigint ELSE NULL END NULLS LAST,
-      fecha
+    ORDER BY fecha, numasient, seqasient
   `;
   const result = await pool.query(sql);
   return result.rows;
