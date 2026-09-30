@@ -8,6 +8,7 @@ const cuePagarRoutes = require('./app/routes/cuepagar.routes');
 const cueCobrarRoutes = require('./app/routes/cuecobrar.routes');
 const balGeneralRoutes = require('./app/routes/balgeneral.routes');
 const balResulRoutes = require('./app/routes/balresul.routes');
+const libroDiarioRoutes = require('./app/routes/librodiario.routes');
 const trabajadoresRoutes = require('./app/routes/trabajadores.routes');
 const clientesRoutes = require('./app/routes/clientes.routes');
 const proveedoresRoutes = require('./app/routes/proveedores.routes');
@@ -78,6 +79,7 @@ const menuLinkMap = {
   '/html/FrmCueCobrar.html': '/cuentas-por-cobrar',
   '/html/FrmBalGeneral.html': '/balance-general',
   '/html/FrmBalResul.html': '/balance-resultados',
+  '/html/LibroDiario.html': '/libro-diario',
   '/html/ResumenAdm.html': '/resumen-administrativo',
   '/html/ResumenAvi.html': '/resumen-avicola',
   '/html/ResumenPor.html': '/resumen-porcina',
@@ -155,6 +157,7 @@ function obtenerModulosPorRuta() {
   resultado['/cuentas-por-cobrar'] = 'ADMINISTRATIVO';
   resultado['/balance-general'] = 'ADMINISTRATIVO';
   resultado['/balance-resultados'] = 'ADMINISTRATIVO';
+  resultado['/libro-diario'] = 'ADMINISTRATIVO';
   resultado['/resumen-administrativo'] = 'ADMINISTRATIVO';
   resultado['/resumen-avicola'] = 'AVICOLA';
   resultado['/pesajeavicola'] = 'AVICOLA';
@@ -177,6 +180,7 @@ const rutasLimpias = {
   '/cuentas-por-cobrar': '/html/FrmCueCobrar.html',
   '/balance-general': '/html/FrmBalGeneral.html',
   '/balance-resultados': '/html/FrmBalResul.html',
+  '/libro-diario': '/html/LibroDiario.html',
   '/resumen-administrativo': '/html/ResumenAdm.html',
   '/resumen-avicola': '/html/ResumenAvi.html',
   '/pesajeavicola': '/html/FrmPesajeavi.html',
@@ -194,6 +198,6 @@ app.use((req, _res, next) => {
   next();
 });
 app.get('/html/:archivo.html',(req,res,next)=>{const archivo=req.params.archivo;const filePath=path.join(__dirname,'public','html',`${archivo}.html`);if(!fs.existsSync(filePath))return next();if(archivo.toLowerCase()==='login')return res.redirect('/login');const session=getSession(req);if(!session)return res.redirect('/html/login.html');if(!moduloPermitido(req))return res.status(403).send('<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Acceso denegado</title><style>body{font-family:Arial,sans-serif;background:#09203C;color:white;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center}div{max-width:520px;padding:30px}a{color:#fff;font-weight:bold}</style></head><body><div><h1>Acceso denegado</h1><p>Su usuario no tiene permisos para acceder a este módulo.</p><a href="/inicio">Volver al menú principal</a></div></body></html>');try{let html=fs.readFileSync(filePath,'utf8');const menuOriginal=obtenerMenuOriginal(session.segapp);if(archivo!=='frmmenprinci'){const inicio=html.indexOf('<nav');const fin=html.indexOf('</nav>',inicio);if(inicio>=0&&fin>=0)html=html.slice(0,inicio)+menuOriginal+html.slice(fin+6);}else{const inicio=html.indexOf('<nav');const fin=html.indexOf('</nav>',inicio);if(inicio>=0&&fin>=0)html=html.slice(0,inicio)+menuOriginal+html.slice(fin+6);}for(const [origenLink,destino] of Object.entries(menuLinkMap))html=html.split(`href="${origenLink}"`).join(`href="${destino}"`);if(!html.includes('href="/html/FrmBalResul.html"')&&session.segapp==='ADMINISTRATIVO'){const balanceGeneralLi=/<li><a href="\/html\/FrmBalGeneral\.html"[^>]*>Balance General<\/a><\/li>/;html=html.replace(balanceGeneralLi,match=>`${match}<li><a href="/html/FrmBalResul.html">Balance de Resultados</a></li>`);}html=html.replace(/\s*<link[^>]+href=["'][^"']*\/css\/frmmenprinci\.css[^"']*["'][^>]*>/gi,'');html=html.replace(/\s*<script[^>]+src=["'][^"']*\/js\/frmmenprinci\.js[^"']*["']><\/script>/gi,'');html=html.replace('</head>','<link rel="stylesheet" href="/css/frmmenprinci.css?v=20260908">\n</head>');html=html.replace('</body>','<script src="/js/frmmenprinci.js?v=20260908"></script>\n</body>');if(archivo.toLowerCase()==='frmreppla'){const jsPath=path.join(__dirname,'public','js','FrmRepPla.js');if(fs.existsSync(jsPath)){const js=fs.readFileSync(jsPath,'utf8');html=html.replace(/<script[^>]+src=["'][^"']*\/js\/FrmRepPla\.js[^"']*["']><\/script>/i,`<script>${js}</script>`);}}res.type('html').send(html);}catch(error){next(error);}});
-app.use('/api',authRoutes);app.use('/api',systemRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),comprasRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),ventasRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),cuePagarRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),cueCobrarRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),balGeneralRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),balResulRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),trabajadoresRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),clientesRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),proveedoresRoutes);
+app.use('/api',authRoutes);app.use('/api',systemRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),comprasRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),ventasRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),cuePagarRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),cueCobrarRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),balGeneralRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),balResulRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),libroDiarioRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),trabajadoresRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),clientesRoutes);app.use('/api',requireSegapp('ADMINISTRATIVO'),proveedoresRoutes);
 app.use('/api', pesajesAvicolasRoutes);
 app.get('/health',systemController.health);app.use(express.static('public'));app.listen(port,'0.0.0.0',()=>console.log(`JRR2026 API listening on port ${port}`));process.on('SIGTERM',async()=>{await pool.end();process.exit(0);});
