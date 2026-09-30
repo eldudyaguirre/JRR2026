@@ -15,8 +15,16 @@ async function obtenerDiario() {
       COALESCE(seqasient::text, '') AS seqasient
     FROM ${TABLA}
     ORDER BY
-      NULLIF(numasient::text, '')::numeric NULLS LAST,
-      NULLIF(seqasient::text, '')::numeric NULLS LAST,
+      CASE
+        WHEN substring(numasient::text FROM '[0-9]+') IS NOT NULL
+        THEN substring(numasient::text FROM '[0-9]+')::numeric
+        ELSE NULL
+      END NULLS LAST,
+      CASE
+        WHEN substring(seqasient::text FROM '[0-9]+') IS NOT NULL
+        THEN substring(seqasient::text FROM '[0-9]+')::numeric
+        ELSE NULL
+      END NULLS LAST,
       fecha
   `;
   const result = await pool.query(sql);
