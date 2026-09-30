@@ -23,9 +23,9 @@ async function listado(req,res){
     if(anio<1900||mes<1||mes>12)return res.status(400).json({error:'Período inválido.'});
     const t=await tablaHistorico();
     const sql=`SELECT * FROM ${ident(t.table_schema)}.${ident(t.table_name)}
-      WHERE "año"::text=$1 AND "mes"::text=$2
+      WHERE "año"::integer=$1 AND "mes"::integer=$2
       ORDER BY "año","mes","numasient","seqasient"`;
-    const r=await pool.query(sql,[String(anio),String(mes).padStart(2,'0')]);
+    const r=await pool.query(sql,[anio,mes]);
     res.json({anio,mes,rows:r.rows,tabla:t.table_schema+'.'+t.table_name});
   }catch(e){console.error('[DIARIO HISTORICO]',e);res.status(500).json({error:'No se pudo consultar el Diario Histórico.',detail:e.message});}
 }
@@ -65,10 +65,10 @@ async function pdf(req,res){
       const h=Math.max(11,doc.heightOfString(ref,{width:refW,font:'Helvetica',fontSize:7})+2);
       if(y+h>doc.page.height-42)next();
       doc.text(dateText(r.fecha),xFecha,y,{width:65,lineBreak:false});
-      doc.text(String(r.CodCuenta??''),xCodigo,y,{width:90,lineBreak:false});
+      doc.text(String(r.codcuenta??''),xCodigo,y,{width:90,lineBreak:false});
       doc.text(ref,xRef,y,{width:refW,lineBreak:true});
-      doc.text(money(r.Debe),xDebe,y,{width:numW,align:'right',lineBreak:false});
-      doc.text(money(r.Haber),xHaber,y,{width:numW,align:'right',lineBreak:false});
+      doc.text(money(r.debe),xDebe,y,{width:numW,align:'right',lineBreak:false});
+      doc.text(money(r.haber),xHaber,y,{width:numW,align:'right',lineBreak:false});
       y+=h;
     }
     foot();doc.end();
