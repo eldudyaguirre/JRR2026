@@ -1,7 +1,7 @@
 {
-  "name": "al2026-api",
+  "name": "jrr2026-api",
   "version": "1.0.0",
-  "description": "API de prueba para conectar Railway con PostgreSQL mediante Tailscale y Railtail.",
+  "description": "API de prueba para conectar servidor PostgreSQL con PostgreSQL mediante Tailscale y Railtail.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
