@@ -13,15 +13,15 @@ function pintar(){
     return;
   }
 
-  body.innerHTML=movimientos.map(r=>
-    '<tr>'+
-      '<td class="fecha">'+escapar(r.fecha || '')+'</td>'+
-      '<td class="codigo">'+escapar(r.codcuenta || '')+'</td>'+
-      '<td class="cuenta">'+escapar(r.detalle || '')+'</td>'+
-      '<td class="monto">'+escapar(r.debe || '')+'</td>'+
-      '<td class="monto">'+escapar(r.haber || '')+'</td>'+
-    '</tr>'
-  ).join('');
+  body.innerHTML=movimientos.map(r=>{
+    return '<tr>'+
+      '<td class="fecha">'+escapar(r.fecha)+'</td>'+
+      '<td class="codigo">'+escapar(r.codcuenta)+'</td>'+
+      '<td class="cuenta">'+escapar(r.detalle)+'</td>'+
+      '<td class="monto">'+escapar(r.debe)+'</td>'+
+      '<td class="monto">'+escapar(r.haber)+'</td>'+
+    '</tr>';
+  }).join('');
 
   document.getElementById('contador').textContent=
     movimientos.length.toLocaleString('es-EC')+' registros';
