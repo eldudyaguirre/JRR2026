@@ -13,21 +13,29 @@ function enlazarEventos(){
   if(input) input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();consultar();}});
 }
 
-async function cargarPeriodo(){
-  try{
-    const r=await fetch('/api/auxiliares/periodo?_='+Date.now());
-    if(r.ok){
-      const d=await r.json();
-      if(Number(d.anio)) actual.anio=Number(d.anio);
-      if(Number(d.mes)) actual.mes=Number(d.mes);
-    }
-  }catch(e){console.warn('[AUX] No se pudo obtener período:',e.message);}
+function llenarPeriodos(){
   const mes=document.getElementById('mes');
   const anio=document.getElementById('anio');
-  mes.innerHTML=Array.from({length:12},(_,i)=>'<option value="'+(i+1)+'">'+String(i+1).padStart(2,'0')+'</option>').join('');
+  if(!mes||!anio)return;
+  const nombres=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  mes.innerHTML=nombres.map((nombre,i)=>'<option value="'+(i+1)+'">'+String(i+1).padStart(2,'0')+' - '+nombre+'</option>').join('');
   anio.innerHTML=Array.from({length:5},(_,i)=>'<option value="'+(actual.anio-i)+'">'+(actual.anio-i)+'</option>').join('');
   mes.value=String(actual.mes);
   anio.value=String(actual.anio);
+}
+
+async function cargarPeriodo(){
+  llenarPeriodos();
+  try{
+    const r=await fetch('/api/auxiliares/periodo?_='+Date.now(),{cache:'no-store'});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.detail||d.error||'No se pudo obtener el período contable.');
+    if(Number(d.anio)) actual.anio=Number(d.anio);
+    if(Number(d.mes)) actual.mes=Number(d.mes);
+  }catch(e){
+    console.warn('[AUX] No se pudo obtener período:',e.message);
+  }
+  llenarPeriodos();
 }
 
 function abrirCuentas(){
