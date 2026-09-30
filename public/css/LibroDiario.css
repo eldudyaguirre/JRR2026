@@ -15,7 +15,7 @@
 .libro-table tbody tr:hover td{background:#faf8f2}
 .libro-table .asiento-row td{background:#f5f6f5;border-top:1px solid #d9ddda;padding-top:11px;padding-bottom:5px}
 .asiento-badge{display:inline-block;background:#B4812D;color:#fff;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700}
-.codigo{width:145px;font-family:Consolas,monospace;color:#153017}.cuenta{color:#303030}.referencia{color:#666;font-style:italic;padding-left:30px!important}.monto{width:120px;text-align:right;font-variant-numeric:tabular-nums}
+.fecha{width:105px;white-space:nowrap}.codigo{width:145px;font-family:Consolas,monospace;color:#153017}.cuenta{color:#303030}.referencia{color:#666;font-style:italic;padding-left:30px!important}.monto{width:120px;text-align:right;font-variant-numeric:tabular-nums}
 .estado-libro{padding:13px 18px;color:#777;font-size:12px;border-top:1px solid #e4e6e8}
 .vacio{padding:60px 20px;text-align:center;color:#888}
 @media(max-width:800px){.libro-page{padding:18px 12px}.libro-header{display:block}.libro-actions{margin-top:15px}.btn-pdf{width:100%;justify-content:center}.libro-scroll{max-height:calc(100vh - 290px)}}
