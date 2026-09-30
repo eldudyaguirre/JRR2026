@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/img/logonuevov2.svg">
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+<link rel="stylesheet" href="/css/LibroDiario.css?v=20260930b">
+<title>Administrativo - Libro Diario</title>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="overlay" id="overlay"></div>
+<section class="content">
+<header class="topbar">
+<button class="mobile-menu" onclick="document.getElementById('sidebar')?.classList.add('open');document.getElementById('overlay')?.classList.add('show')"><i class="fi fi-rr-menu-burger"></i></button>
+<div class="topbar-title">Administrativo <span>Libro Diario</span></div>
+</header>
+<main class="libro-page">
+<div class="libro-header">
+<div class="libro-title">
+<h1>Libro Diario</h1>
+<p>Consulta de los asientos contables registrados en el Diario General.</p>
+</div>
+<div class="libro-actions">
+<button class="btn-pdf" id="btn-pdf"><i class="fi fi-rr-file-pdf"></i> Generar PDF</button>
+</div>
+</div>
+<section class="libro-card">
+<div class="libro-card-head">
+<strong>Diario General</strong>
+<div><span id="contador">Cargando...</span><span id="fuente"></span></div>
+</div>
+<div class="libro-scroll">
+<table class="libro-table">
+<thead>
+<tr><th>Código</th><th>Cuenta / Referencia</th><th class="num">Debe</th><th class="num">Haber</th></tr>
+</thead>
+<tbody id="diario-body"></tbody>
+</table>
+</div>
+<div class="estado-libro" id="estado">Preparando consulta...</div>
+</section>
+</main>
+</section>
+</div>
+<script src="/js/LibroDiario.js?v=20260930b"></script>
+</body>
+</html>
