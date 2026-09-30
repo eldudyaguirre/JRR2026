@@ -33,86 +33,189 @@ function esReferencia(row) {
 function generarPDF(rows, res) {
   const doc = new PDFDocument({
     size: 'A4',
-    margin: 38,
-    info: {Title:'Diario General', Author:'JRR CIA.LTDA.', Subject:'Libro Diario de Contabilidad'}
+    margin: 0,
+    bufferPages: true,
+    info: {
+      Title: 'Diario General',
+      Author: 'JRR CIA.LTDA.',
+      Subject: 'Libro Diario de Contabilidad'
+    }
   });
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'inline; filename="diariogeneral.pdf"');
   doc.pipe(res);
 
-  const left = doc.page.margins.left;
-  const right = doc.page.width - doc.page.margins.right;
-  const width = right - left;
-  const xFecha = left;
-  const xCuenta = left + 62;
-  const xDebe = right - 125;
-  const xHaber = right - 60;
-  const cuentaWidth = xDebe - xCuenta - 8;
-  const amountWidth = 60;
+  // Formato basado en el Diario General de referencia:
+  // FECHA | CODIGO | CUENTA / REFERENCIA | DEBE | HABER
+  const pageLeft = 38;
+  const pageRight = doc.page.width - 38;
+  const pageWidth = pageRight - pageLeft;
+
+  const xFecha = pageLeft;
+  const xCodigo = xFecha + 62;
+  const xDetalle = xCodigo + 58;
+  const xDebe = pageRight - 112;
+  const xHaber = pageRight - 56;
+
+  const wFecha = xCodigo - xFecha - 5;
+  const wCodigo = xDetalle - xCodigo - 5;
+  const wDetalle = xDebe - xDetalle - 8;
+  const wMonto = 52;
+
+  const top = 27;
+  const headerLine = 76;
+  const bottom = doc.page.height - 42;
 
   function encabezado() {
-    doc.font('Helvetica-Bold').fontSize(9.5)
-      .text('JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD', left, 28, {width});
-    doc.font('Helvetica-Bold').fontSize(11)
-      .text('DIARIO GENERAL', left, 43, {width, align:'center'});
+    doc.font('Helvetica-Bold').fontSize(9.5);
+    doc.text(
+      'JRR CIA.LTDA. - 0791842952001 - CONTABILIDAD',
+      pageLeft,
+      top,
+      { width: pageWidth, align: 'left', lineBreak: false }
+    );
+
+    doc.font('Helvetica-Bold').fontSize(11);
+    doc.text(
+      'DIARIO GENERAL',
+      pageLeft,
+      42,
+      { width: pageWidth, align: 'center', lineBreak: false }
+    );
+
     doc.font('Helvetica').fontSize(7.5);
-    doc.text('FECHA', xFecha, 63, {width:55});
-    doc.text('CODIGO', xCuenta, 63, {width:55});
-    doc.text('CUENTA / REFERENCIA', xCuenta + 48, 63, {width:cuentaWidth - 48});
-    doc.text('DEBE', xDebe, 63, {width:amountWidth, align:'right'});
-    doc.text('HABER', xHaber, 63, {width:amountWidth, align:'right'});
-    doc.moveTo(left, 75).lineTo(right, 75).lineWidth(0.5).stroke();
+    doc.text('FECHA', xFecha, 63, { width: wFecha, lineBreak: false });
+    doc.text('CODIGO', xCodigo, 63, { width: wCodigo, lineBreak: false });
+    doc.text('CUENTA / REFERENCIA', xDetalle, 63, {
+      width: wDetalle,
+      lineBreak: false
+    });
+    doc.text('DEBE', xDebe, 63, {
+      width: wMonto,
+      align: 'right',
+      lineBreak: false
+    });
+    doc.text('HABER', xHaber, 63, {
+      width: wMonto,
+      align: 'right',
+      lineBreak: false
+    });
+
+    doc.moveTo(pageLeft, headerLine)
+      .lineTo(pageRight, headerLine)
+      .lineWidth(0.5)
+      .stroke();
   }
 
-  let pagina = 1;
+  function piePagina() {
+    const paginas = doc.bufferedPageRange();
+    for (let i = 0; i < paginas.count; i++) {
+      doc.switchToPage(i);
+      doc.font('Helvetica').fontSize(7);
+      doc.text(
+        'pag. ' + (i + 1) + ' de ' + paginas.count,
+        pageLeft,
+        doc.page.height - 27,
+        { width: pageWidth, align: 'right', lineBreak: false }
+      );
+    }
+  }
+
+  function altoTexto(texto, ancho, size = 7.5) {
+    return doc.heightOfString(String(texto ?? ''), {
+      width: ancho,
+      font: 'Helvetica',
+      fontSize: size
+    });
+  }
+
   let y = 82;
   let ultimoAsiento = null;
+
   encabezado();
 
   function nuevaPagina() {
-    doc.font('Helvetica').fontSize(7)
-      .text('pag. ' + pagina, left, doc.page.height - 27, {width, align:'right'});
     doc.addPage();
-    pagina++;
-    encabezado();
     y = 82;
+    encabezado();
   }
 
   for (const row of rows) {
-    const asiento = String(row.numasient || '').trim();
-    const nuevo = asiento !== ultimoAsiento;
-    const texto = String(row.detalle || '');
+    // No se alteran los campos de texto para construir el contenido.
+    const asiento = String(row.numasient ?? '');
+    const codigo = String(row.codcuenta ?? '');
+    const detalle = String(row.detalle ?? '');
+    const referencia = codigo === '';
 
-    if (nuevo) {
-      if (y > doc.page.height - 75) nuevaPagina();
+    // En el formato original, la referencia SA va primero con la fecha,
+    // luego aparece el número de asiento y después sus cuentas.
+    if (referencia) {
+      const alto = Math.max(11, altoTexto(detalle, pageWidth - 10));
+
+      if (y + alto > bottom) nuevaPagina();
+
       doc.font('Helvetica').fontSize(7.5);
-      doc.text(fecha(row.fecha), xFecha, y, {width:55});
-      doc.text('- ' + asiento + ' -', xDebe - 15, y, {width:90, align:'center'});
-      y += 12;
+      doc.text(String(fecha(row.fecha) || ''), xFecha, y, {
+        width: wFecha,
+        lineBreak: false
+      });
+      doc.text(detalle, xDetalle - 3, y, {
+        width: pageRight - xDetalle + 3,
+        lineBreak: false
+      });
+
+      y += Math.max(11, alto + 2);
+      continue;
+    }
+
+    // El número de asiento aparece una sola vez antes de sus cuentas.
+    if (asiento !== ultimoAsiento) {
+      if (y + 21 > bottom) nuevaPagina();
+
+      doc.font('Helvetica').fontSize(7.5);
+      doc.text('- ' + asiento + ' -', xDetalle, y, {
+        width: wDetalle,
+        align: 'center',
+        lineBreak: false
+      });
+
+      y += 13;
       ultimoAsiento = asiento;
     }
 
-    if (esReferencia(row)) {
-      const alto = doc.heightOfString(texto, {width:width - 20, font:'Helvetica', fontSize:7.5});
-      if (y + alto > doc.page.height - 48) nuevaPagina();
-      doc.font('Helvetica').fontSize(7.5)
-        .text(texto, xCuenta - 3, y, {width:width - 10});
-      y += Math.max(11, alto + 2);
-    } else {
-      const alto = doc.heightOfString(texto, {width:cuentaWidth, font:'Helvetica', fontSize:7.5});
-      if (y + alto > doc.page.height - 48) nuevaPagina();
-      doc.font('Helvetica').fontSize(7.5)
-        .text(String(row.codcuenta || ''), xCuenta, y, {width:55})
-        .text(texto, xCuenta + 48, y, {width:cuentaWidth - 48})
-        .text(numero(row.debe), xDebe, y, {width:amountWidth, align:'right'})
-        .text(numero(row.haber), xHaber, y, {width:amountWidth, align:'right'});
-      y += Math.max(11, alto + 2);
-    }
+    const alto = Math.max(11, altoTexto(detalle, wDetalle - 48));
+
+    if (y + alto > bottom) nuevaPagina();
+
+    doc.font('Helvetica').fontSize(7.5);
+
+    doc.text(codigo, xCodigo, y, {
+      width: wCodigo,
+      lineBreak: false
+    });
+
+    doc.text(detalle, xDetalle, y, {
+      width: wDetalle,
+      lineBreak: false
+    });
+
+    doc.text(numero(row.debe), xDebe, y, {
+      width: wMonto,
+      align: 'right',
+      lineBreak: false
+    });
+
+    doc.text(numero(row.haber), xHaber, y, {
+      width: wMonto,
+      align: 'right',
+      lineBreak: false
+    });
+
+    y += alto + 2;
   }
 
-  doc.font('Helvetica').fontSize(7)
-    .text('pag. ' + pagina, left, doc.page.height - 27, {width, align:'right'});
+  piePagina();
   doc.end();
 }
 
