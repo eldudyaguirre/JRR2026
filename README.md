@@ -1,4 +1,4 @@
-# AL2026
+# JRR2026
 
 Aplicación web de Avícola y Porcina Luisin.
 
@@ -7,7 +7,7 @@ Aplicación web de Avícola y Porcina Luisin.
 El proyecto utiliza **Node.js + Express** como API y **PostgreSQL** como base de datos. El frontend permanece separado en HTML, CSS y JavaScript dentro de `public`.
 
 ```text
-AL2026/
+JRR2026/
 ├── app/
 │   ├── auth/
 │   │   └── session.js
@@ -49,4 +49,4 @@ Las rutas `/login.html` y `/frmmenprinci.html` se mantienen como compatibilidad 
 
 Se puede usar `DATABASE_URL` o las variables individuales `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
 
-Para Railway + Railtail, la conexión puede configurarse mediante el dominio privado de Railtail.
+Para servidor PostgreSQL + Railtail, la conexión puede configurarse mediante el dominio privado de Railtail.
